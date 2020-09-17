@@ -8,7 +8,7 @@ from numpy import genfromtxt
 import numpy as np
 from numpy import *
 import matplotlib
-#matplotlib.use('TKAgg') # matplotlib renderer for windows
+
 
 import matplotlib.pyplot as plt
 
@@ -20,15 +20,15 @@ from itertools import cycle
 from sklearn import cross_validation
 from sklearn.svm import SVC
 
-# After imorting all the necessary packages now
-#Loading the data and pruning it
+
+# Loading data to DF and pruning
 dataset = genfromtxt('Desktop/Heart/data.csv',delimiter=',')
 
-#Printing the datasetd
-X = dataset[:,0:12] #Feature set
-Y = dataset[:,13]    #label Set
+# Printing feature and label set attributes
+X = dataset[:,0:12] # Feature set
+Y = dataset[:,13]  # Label Set
 
-#Replacing 1-4 by label 1  tesko arthaat   # Item with 0 value is already indexed as 0 , so rest are indexed as 1
+# Binarization of label output
 for index, item in enumerate(Y):   # Last row gives 4 diff types of output , so convert them to 0  or 1 
 	if not (item == 0.0):       # that is either Yes or No
 		Y[index] = 1
@@ -36,9 +36,9 @@ print(Y)
 target_names = ['0','1']
 
 
-# PLOTTING part starts
+# Plotting and Dimensionality Reduction
 
-#Method to plot the graph for reduced Dimensions
+# Method to plot the graph for reduced dimensions
 def plot_2D(data,target,target_names):
 	colors = cycle('rgbcmykw')
 	target_ids = range(len(target_names))
@@ -48,17 +48,17 @@ def plot_2D(data,target,target_names):
 	plt.legend()
 	plt.savefig('Problem 2 Graph')
 
-# TIME FOR SVM
-# Classifying the data using a linear SVM and perdicting the probabilities of disease belonging to a particular classs
+
+# Classifying the data using a linear SVM and perdicting the probabilities of disease belonging to a particular class
 
 modelSVM = LinearSVC(C=0.1)
-pca = PCA(n_components=2, whiten=True).fit(X)   # n denotes number of components to keep after Dimensionality Reduction
+pca = PCA(n_components=2, whiten=True).fit(X)   # n - the number of components retained after Dimensionality Reduction
 X_new = pca.transform(X)
 
-#Calling the above defined function plot_2D
+# Plotting graph depicting features and labels
 plot_2D(X_new, Y, target_names)
 
-# Applying cross validation on the training and test set for validating our linear SVM model
+# Performing cross validation on train and test sets for validating the linear SVM model
 X_train,X_test,Y_train,Y_test = cross_validation.train_test_split(X_new, Y, test_size = 0.2, train_size=0.8, random_state=0)
 modelSVM = modelSVM.fit(X_train,Y_train)
 print("Linear SVC values with Split")
@@ -75,10 +75,10 @@ for i in modelSVMRaw.predict(X_new):
 print("Linear SVC score without split")
 print(float(cnt)/101)
 
-# Applying the PCA on the data features
+# Applying the PCA on the feature set
 modelSVM2 = SVC(C = 0.1,kernel='rbf')
 
-# Applying the cross validation on training and the test set for validating our linear SVM model
+# Applying the cross validation on training and the test set for validating the linear SVM model
 X_train1,X_test1,Y_train1,Y_test1 = cross_validation.train_test_split(X_new, Y, test_size = 0.2, train_size=0.1, random_state=0)
 modelSVM2 = modelSVM2.fit(X_train1,Y_train1)
 print("RBF score with split")
@@ -96,29 +96,29 @@ print(float(cnt1)/298)
 
 
 
-# Only perform 2 algorithms
 
-# creating the mest plots
+
+# Generating the mesh plots
 X_min, X_max = X_new[:,0].min() - 1, X_new[:,0].max() + 1
 Y_min, Y_max = X_new[:,1].min() - 1, X_new[:,1].max() + 1
 xx, yy = np.meshgrid(np.arange(X_min, X_max,0.2),
 	                 np.arange(Y_min, Y_max,0.2))
 
-#Titles for the plot
+# Axis titles for the plot
 titles = "SVC ( RBF kernel) - Plotting highest varied 2 PCA values"
 
-# PLot the decision boundary . For that we'l; assign a color to each
-# point in the mesh
+# Plotting decision boundaries using contrast coloring
+# for each point in the mesh
 plt .subplot(2,2, i + 1)
 plt.subplots_adjust(wspace = 0.4, hspace=0.4)
 Z = modelSVM2.predict(np.c_[xx.ravel(), yy.ravel()])
 
 
-#Put the result into a color plot
+# Convert the obtained result into a color plot
 Z = Z.reshape(xx.shape)
 plt.contourf(xx,yy,Z,cmap=plt.cm.Paired, alpha=0.1)
 
-#plot also the color points
+# Plot the color points to show classified segments
 plt.scatter(X_new[:,0], X_new[:,1], c=Y, cmap = plt.cm.Paired)
 plt.xlabel("PCA1")
 plt.ylabel("PCA2")
